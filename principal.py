@@ -45,7 +45,7 @@ class IngresoGastoDialog(QDialog):
                 categoria = self.categoria_input.text()
                 es_gasto_pequeño = bool(int(self.es_gasto_pequeño_input.text()))  # Convierte a booleano
                 self.parent().ingresos_gastos.agregar_gasto(usuario_id=1, cantidad=cantidad, 
-                                                             categoria=categoria, es_gasto_pequeño=es_gasto_pequeño)
+                                                             categoria=categoria, es_gasto_pequeño=es_gasto_pequeño,fecha=fecha)
                 QMessageBox.information(self, "Éxito", "Gasto registrado.")
             self.close()
         except ValueError:
