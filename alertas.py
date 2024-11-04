@@ -9,7 +9,7 @@ class Notificaciones:
         self.ventana_principal = ventana_principal
 
     def verificar_gastos_pequeños(self, usuario_id):
-        # Crear una nueva conexión a la base de datos
+       
         conn = sqlite3.connect('finanzas.db')
         while True:
             consulta = 'SELECT SUM(cantidad) FROM gastos WHERE usuario_id = ? AND es_gasto_pequeño = 1'
@@ -17,7 +17,7 @@ class Notificaciones:
             if total_gastos_pequeños > 100:
                 self.mostrar_alerta("¡Cuidado! Los gastos de hormiga superan el límite.")
             time.sleep(60)
-        conn.close()  # Asegúrate de cerrar la conexión
+        conn.close()  
 
     def mostrar_alerta(self, mensaje):
         alerta = QMessageBox()
@@ -26,5 +26,5 @@ class Notificaciones:
 
     def iniciar_notificaciones(self, usuario_id):
         hilo = threading.Thread(target=self.verificar_gastos_pequeños, args=(usuario_id,))
-        hilo.daemon = True  # Esto permitirá que el hilo se cierre cuando se cierre la aplicación
+        hilo.daemon = True  
         hilo.start()
