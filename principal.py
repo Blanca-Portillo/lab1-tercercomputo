@@ -1,110 +1,50 @@
-import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget,
-                             QLineEdit, QDialog, QLabel, QFormLayout, QMessageBox)
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton
 from base import BaseDeDatos
-from ingreso import IngresosGastos
-from graficos import AnalisisCategoria
+from ingreso import IngresosGastos  # Asegúrate de que este archivo esté correctamente implementado
+from graficos import AnalisisFinanciero  # Asegúrate de que el nombre de la clase sea 'AnalisisFinanciero'
 from alertas import Notificaciones
 
-class IngresoGastoDialog(QDialog):
-    def __init__(self, tipo, parent=None):
-        super().__init__(parent)
-        self.tipo = tipo
-        self.initUI()
-
-    def initUI(self):
-        self.setWindowTitle(f"Registrar {self.tipo}")
-        layout = QFormLayout()
-
-        self.cantidad_input = QLineEdit()
-        self.fecha_input = QLineEdit()   
-
-        layout.addRow(QLabel("Cantidad:"), self.cantidad_input)
-        layout.addRow(QLabel("Fecha:"), self.fecha_input)
-
-        if self.tipo == "Gasto":
-            self.categoria_input = QLineEdit()
-            self.es_gasto_pequeño_input = QLineEdit()
-            layout.addRow(QLabel("Categoría:"), self.categoria_input)
-            layout.addRow(QLabel("¿Es gasto pequeño? (1=Sí, 0=No):"), self.es_gasto_pequeño_input)
-
-        self.submit_button = QPushButton("Registrar")
-        self.submit_button.clicked.connect(self.submit_data)
-        layout.addRow(self.submit_button)
-
-        self.setLayout(layout)
-
-    def submit_data(self):
-        try:
-            cantidad = float(self.cantidad_input.text())
-            fecha = self.fecha_input.text() 
-            if self.tipo == "Ingreso":
-                self.parent().ingresos_gastos.agregar_ingreso(usuario_id=1, cantidad=cantidad, fecha=fecha)
-                QMessageBox.information(self, "Éxito", "Ingreso registrado.")
-            else: 
-                categoria = self.categoria_input.text()
-                es_gasto_pequeño = bool(int(self.es_gasto_pequeño_input.text()))  
-                self.parent().ingresos_gastos.agregar_gasto(usuario_id=1, cantidad=cantidad, 
-                                                             categoria=categoria, es_gasto_pequeño=es_gasto_pequeño,fecha=fecha)
-                QMessageBox.information(self, "Éxito", "Gasto registrado.")
-            self.close()
-        except ValueError:
-            QMessageBox.warning(self, "Error", "Por favor ingrese valores válidos.")
-
-class FinanceApp(QMainWindow):
+class UI(QMainWindow):
     def __init__(self):
         super().__init__()
-
-        
-        self.bd = BaseDeDatos()
-
-        
-        self.ingresos_gastos = IngresosGastos(self.bd)
-        self.analisis = AnalisisCategoria(self.bd)
-        self.notifications = Notificaciones(self.bd, self)
-
+        self.setWindowTitle("Gestión Financiera Personal")
+        self.setGeometry(100, 100, 800, 600)
+        self.bd = BaseDeDatos()  # Conectar con la base de datos
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle("Sistema de Administración y Ahorro de Dinero")
         layout = QVBoxLayout()
+        
+        btn_graficos = QPushButton("Analizar Gastos")
+        btn_graficos.clicked.connect(self.mostrar_graficos)
+        layout.addWidget(btn_graficos)
 
-      
-        self.income_button = QPushButton("Registrar Ingreso")
-        self.expense_button = QPushButton("Registrar Gasto")
-        self.analysis_button = QPushButton("Análisis de Gastos")
+        btn_alertas = QPushButton("Configurar Alertas")
+        btn_alertas.clicked.connect(self.mostrar_alertas)
+        layout.addWidget(btn_alertas)
 
-      
-        self.income_button.clicked.connect(self.open_income_dialog)
-        self.expense_button.clicked.connect(self.open_expense_dialog)
-        self.analysis_button.clicked.connect(self.show_analysis)
-
-      
-        layout.addWidget(self.income_button)
-        layout.addWidget(self.expense_button)
-        layout.addWidget(self.analysis_button)
+        btn_progreso = QPushButton("Ver Progreso Mensual")
+        btn_progreso.clicked.connect(self.ver_progreso)
+        layout.addWidget(btn_progreso)
 
         container = QWidget()
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-      
-        self.notifications.iniciar_notificaciones(usuario_id=1) 
+    def mostrar_graficos(self):
+        analisis = AnalisisFinanciero(self.bd)
+        analisis.graficar_distribucion_gastos(1)  # Usuario ejemplo con ID = 1
 
-    def open_income_dialog(self):
-        dialog = IngresoGastoDialog("Ingreso", self)
-        dialog.exec_()
+    def mostrar_alertas(self):
+        alertas = Notificaciones(self.bd, self)
+        alertas.iniciar_notificaciones(1)  # Usuario ejemplo con ID = 1
 
-    def open_expense_dialog(self):
-        dialog = IngresoGastoDialog("Gasto", self)
-        dialog.exec_()
-
-    def show_analysis(self):
-        
-        self.analisis.graficar_distribucion_gastos(usuario_id=1)
+    def ver_progreso(self):
+        analisis = AnalisisFinanciero(self.bd)
+        analisis.graficar_progreso_mensual(1)  # Usuario ejemplo con ID = 1
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    mainWindow = FinanceApp()
-    mainWindow.show()
-    sys.exit(app.exec_())
+    app = QApplication([])
+    ventana = UI()
+    ventana.show()
+    app.exec_()
