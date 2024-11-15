@@ -13,7 +13,8 @@ class AnalisisFinanciero:
             return
 
         # Convertir los datos a un DataFrame
-        df = pd.DataFrame(gastos, columns=["ID", "Fecha", "Cantidad"])
+        df = pd.DataFrame(gastos, columns=["ID", "Fecha", "Cantidad","_", "_", "_"]).iloc[:,:3]
+
 
         # Verificar si la columna 'Fecha' es ya de tipo datetime
         if not pd.api.types.is_datetime64_any_dtype(df['Fecha']):
